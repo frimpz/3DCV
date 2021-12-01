@@ -39,6 +39,26 @@ for i, c in enumerate(CLASSES):
     if c != "N/A":
         coco2d2[i] = count
         count+=1
-print(coco2d2)
+# print(coco2d2)
 
-exit()
+transform = T.Compose([
+     T.Resize(800),
+     T.ToTensor(),
+     T.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+ ])
+
+model, postprocessor = torch.hub.load('facebookresearch/detr', 'detr_resnet101_panoptic', pretrained=True, return_postprocessor=True, num_classes=250)
+model.eval()
+
+url = "http://images.cocodataset.org/val2017/000000281759.jpg"
+im = Image.open(requests.get(url, stream=True).raw)
+
+img = transform(im).unsqueeze(0)
+out = model(img)
+
+
+print(out['pred_logits'].shape)
+
+# scores = out["pred_logits"].softmax(-1)[..., :-1].max(-1)[0]
+
+# exit()
